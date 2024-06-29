@@ -10,7 +10,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const cartItems = document.getElementById('cart-items');
-            const userID = 'testUser'; // 사용자 ID
+            const pointModal = document.getElementById('pointModal');
+            const cashModal = document.getElementById('cashModal');
+            const sendPointLink = document.getElementById('sendPoint');
+            const sendCashLink = document.getElementById('sendCash');
+            const pointForm = document.getElementById('pointForm');
+            const cashForm = document.getElementById('cashForm');
 
             document.querySelectorAll('.book-item').forEach(function (bookItem) {
                 bookItem.querySelector('.actions button[type="cart"]').addEventListener('click', function () {
@@ -24,20 +29,81 @@
                         cartItems.removeChild(listItem);
                     });
                 });
+            });
+            // 포인트 보내기 링크 클릭 시 모달 열기
+    sendPointLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        pointModal.style.display = 'block';
+    });
 
-                bookItem.querySelector('.actions button[type="buy"]').addEventListener('click', async function () {
-                    const bookID = bookItem.querySelector('figcaption').textContent;
+    // 캐시 보내기 링크 클릭 시 모달 열기
+    sendCashLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        cashModal.style.display = 'block';
+    });
 
-                    try { 
-                        const response = await fetch(`/purchaseBook?userID=${userID}&bookID=${bookID}`);
-                        const result = await response.text();
-                        alert(result);
-                    } catch (error) {
-                        console.error('Error purchasing book:', error);
+    // 모달 닫기 버튼 클릭 시 모달 닫기
+    const closeButtons = document.querySelectorAll('.close');
+    closeButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            pointModal.style.display = 'none';
+            cashModal.style.display = 'none';
+        });
+    });
+
+    // 포인트 보내기 폼 제출 시
+    pointForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(pointForm);
+        const receiver = formData.get('receiver');
+
+        try {
+            const response = await fetch('/sendPoint', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ receiver })
+            });
+
+            if (response.ok) {
+                alert('포인트를 성공적으로 보냈습니다.');
+                pointModal.style.display = 'none';
+            } else {
+                alert('포인트 보내기 실패');
+            }
+        } catch (error) {
+            console.error('포인트 보내기 오류:', error);
+            alert('포인트 보내기 중 오류가 발생했습니다.');
+        }
+        // 캐시 보내기 폼 제출 시
+            cashForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const formData = new FormData(cashForm);
+                const receiver = formData.get('receiver');
+
+                try {
+                    const response = await fetch('/sendCash', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ receiver })
+                    });
+
+                    if (response.ok) {
+                        alert('캐시를 성공적으로 보냈습니다.');
+                        cashModal.style.display = 'none';
+                    } else {
+                        alert('캐시 보내기 실패');
                     }
-                });
+                } catch (error) {
+                    console.error('캐시 보내기 오류:', error);
+                    alert('캐시 보내기 중 오류가 발생했습니다.');
+                }
             });
         });
+    });
     </script>
 </head>
 
@@ -52,8 +118,8 @@
             <i class="fas fa-search search-icon"></i>
         </div>
         <div class="auth-buttons">
-            <a href="#">로그인</a>
-            <a href="#">회원가입</a>
+            <a href="/log">로그인</a>
+            <a href="/join">회원가입</a>
         </div>
     </div>
 
@@ -190,16 +256,50 @@
     </div>
 
     <div class="sidebar-fixed sidebar-1">
-        <h2>{User} 님 환영합니다.</h2>
+        {{#if userid}}
+        <h2>{{userid}} 님 환영합니다.</h2>
         <ul>
             <li>잔여 캐시 : </li>
             <li>잔여 포인트 : </li>
-            <h2><a href="#">포인트 보내기</a></h2>
-            <h2><a href="#">캐시 보내기</a></h2>
+            <h2><a href="#" id="sendPoint">포인트 보내기</a></h2>
+            <h2><a href="#" id="sendCash">캐시 보내기</a></h2>
         </ul>
+        {{else}}
+        <h3>로그인 해주세요</h3>
+        {{/if}}
+    </div>
+{{!--  포인트 보내기  --}}
+    <div id="pointModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>포인트 보내기</h2>
+            <form id="pointForm">
+                <label for="receiver">받는 사람:</label>
+                <input type="text" id="receiver" name="receiver" required>
+                <button type="submit">보내기</button>
+            </form>
+        </div>
+    </div>
+{{!-- 캐시 보내기 --}}
+    <div id="cashModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>캐시 보내기</h2>
+            <form id="cashForm">
+                <label for="receiver">받는 사람:</label>
+                <input type="text" id="receiver" name="receiver" required>
+                <button type="submit">보내기</button>
+            </form>
+        </div>
     </div>
 
     <div class="sidebar-fixed sidebar-2">
+        <div class="cart-items">
+            <h3>캐시 충전</h3>
+            <button type="buy">충전</button>
+        </div>
+    </div>
+    <div class="sidebar-fixed sidebar-3">
         <div class="cart-items">
             <h3>장바구니</h3>
             <ul id="cart-items">
@@ -234,4 +334,3 @@
 </body>
 
 </html>
-
