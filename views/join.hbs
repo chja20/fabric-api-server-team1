@@ -29,7 +29,9 @@
         const formData = new FormData(signupForm);
         const userData = {
           userid: formData.get('userid'),
-          password: formData.get('password')
+          password: formData.get('password'),
+          userVal: '0', // 초기화할 값
+          userPoint: '0', // 초기화할 값
         };
 
         try {
@@ -48,6 +50,23 @@
           const data = await response.json();
           console.log('User created:', data);
           alert('User created successfully!');
+          const initResponse = await fetch('http://localhost:3000/init', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user: userData.userid,
+              userVal: '0',
+              userPoint: '0',
+            }),
+          });
+          if (!initResponse.ok) {
+            throw new Error('Failed to initialize user');
+          }
+
+          console.log('User initialized successfully!');
+
           signupForm.reset(); // 폼 초기화
         } catch (error) {
           console.error('Error:', error);

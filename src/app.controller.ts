@@ -13,13 +13,12 @@ export class AppController {
     return { userid };
   }
 
-  @Get('/init')
+  @Post('/init')
   async init(
-    @Query('user') user: string,
-    @Query('userVal') userVal: string,
-    @Query('userPoint') userPoint: string,
+    @Body('user') user: string,
+    @Body('userVal') userVal: string,
+    @Body('userPoint') userPoint: string,
   ): Promise<string> {
-    return this.appService.init(user, userVal, userPoint);
     return this.appService.init(user, userVal, userPoint);
   }
 
