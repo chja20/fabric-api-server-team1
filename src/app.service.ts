@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-<<<<<<< HEAD
 import { send } from './util/connectFabric';
-=======
-import { send } from './util/connectFabic';
->>>>>>> aa202380c488d378218cadf75310102cafc6e9a1
 
 @Injectable()
 export class AppService {
@@ -11,26 +7,22 @@ export class AppService {
     return { message: 'Hello World!' };
   }
 
-  async init(user: string, userVal: string) {
-    const args = [user, userVal];
+  async init(user: string, userVal: string, userPoint: string) {
+    const args = [user, userVal, userPoint];
     console.log(`Init Args: ${args}`);
     return await send(false, 'init', args);
   }
 
-  async changeMoney(userinfo: string, amount: string) {
-    const args = [userinfo, amount];
-    console.log(`ChangeMoney Args: ${args}`);
-    return await send(false, 'changeMoney', args);
+  async invoke(sender: string, receiver: string, amount: string) {
+    const args = [sender, receiver, amount];
+    console.log(`Invoke Args: ${args}`);
+    return await send(false, 'invoke', args);
   }
 
   async invokePoint(sender: string, receiver: string, amount: string) {
     const args = [sender, receiver, amount];
+    console.log(`invokePoint Args: ${args}`);
     return await send(false, 'invokePoint', args);
-  }
-
-  async invokeCash(sender: string, receiver: string, amount: string) {
-    const args = [sender, receiver, amount];
-    return await send(false, 'invokeCash', args);
   }
 
   async query(name: string): Promise<any> {
@@ -41,16 +33,30 @@ export class AppService {
     return result;
   }
 
-  async init(user:string, userval:string){
-    const args = [user, userval];
-    return await send(false, 'init', args);
+  async queryPoint(name: string): Promise<any> {
+    const args = [name + '_point'];
+    console.log(`Query Point Args: ${args}`);
+    const result = await send(true, 'query', args);
+    console.log(`Query Point Result: ${result}`);
+    return result;
   }
 
-
-  async chargeMoney(userInfo:string, amount:string){
-    const args = [userInfo, amount];
-    return await send(false, 'cahrgeMoney', args);
+  async queryAll(name: string): Promise<any> {
+    const args = [name];
+    console.log(`Query All Args: ${args}`);
+    const result = await send(true, 'queryAll', args);
+    console.log(`Query All Result: ${result}`);
+    const parsedResult = JSON.parse(result);
+    return {
+      이름: parsedResult.name,
+      캐시: parsedResult.amount,
+      포인트: parsedResult.points
+    };
   }
 
-
+  async purchaseBook(userID: string, bookID: string) {
+    const args = [userID, bookID];
+    console.log(`purchaseBook Args: ${args}`);
+    return await send(false, 'purchaseBook', args);
+  }
 }
